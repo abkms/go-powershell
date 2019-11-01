@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"math/rand"
 	"os/exec"
 	"strconv"
@@ -30,6 +29,7 @@ const (
 )
 
 type Shell struct {
+	codePage       int
 	enc            encoding.Encoding
 	cmd            *exec.Cmd
 	stdin          io.WriteCloser
@@ -53,7 +53,7 @@ func New() (*Shell, error) {
 		return nil, err
 	}
 
-	cp, err := s.getCodePage()
+	cp, err := s.detectCodePage()
 	if err != nil {
 		return nil, err
 	}
@@ -63,26 +63,7 @@ func New() (*Shell, error) {
 		return nil, ErrUnsupportedCodePage
 	}
 
-	s.enc = enc
-	return s, nil
-}
-
-func NewCodePage(codePage int) (*Shell, error) {
-	s, err := newShell()
-	if err != nil {
-		return nil, err
-	}
-
-	out, err := s.Exec(fmt.Sprintf("chcp %d", codePage))
-	if err != nil {
-		return nil, err
-	}
-	log.Printf("chcp %d -> %s", codePage, out)
-
-	enc := Encodings[codePage]
-	if enc == nil {
-		return nil, ErrUnsupportedCodePage
-	}
+	s.codePage = cp
 	s.enc = enc
 	return s, nil
 }
@@ -129,7 +110,11 @@ func newShell() (*Shell, error) {
 	return s, nil
 }
 
-func (s *Shell) getCodePage() (int, error) {
+func (s *Shell) CodePage() int {
+	return s.codePage
+}
+
+func (s *Shell) detectCodePage() (int, error) {
 	out, err := s.Exec("chcp")
 	if err != nil {
 		return 0, fmt.Errorf("get codepage: %s", err)
