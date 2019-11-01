@@ -1,3 +1,10 @@
+// powershell provides a PowerShell session in which
+// you can execute commands serially (one at a time).
+//
+// It detects the current code page when a session is
+// created. And when running a command, it encodes
+// the command and decodes the output from stdout or
+// stderr with the encoding corresponding to the code page.
 package powershell
 
 import (
@@ -28,6 +35,7 @@ const (
 	boundaryRandomPartByteLen = 12
 )
 
+// Shell represents a PowerShell session.
 type Shell struct {
 	codePage       int
 	enc            encoding.Encoding
@@ -40,13 +48,20 @@ type Shell struct {
 	boundaryBuf    [boundaryPrefixLen + 2*boundaryRandomPartByteLen]byte
 }
 
+// ErrUnsupportedCodePage is the error returned from the New
+// method if the detected code page is not in the Encodings map.
 var ErrUnsupportedCodePage = errors.New("unsupported code page")
 
+// Encodings contains a mapping from code page to encoding.
+// Only code page 932 and 65001 are supported by default.
+// To use with other code pages, you need to add an entry
+// before calling the New method.
 var Encodings = map[int]encoding.Encoding{
 	932:   japanese.ShiftJIS,
 	65001: encoding.Nop,
 }
 
+// New creates a new PowerShell session.
 func New() (*Shell, error) {
 	s, err := newShell()
 	if err != nil {
@@ -110,6 +125,7 @@ func newShell() (*Shell, error) {
 	return s, nil
 }
 
+// CodePage returns the detected code page of the session.
 func (s *Shell) CodePage() int {
 	return s.codePage
 }
@@ -131,6 +147,8 @@ func (s *Shell) detectCodePage() (int, error) {
 	return cp, nil
 }
 
+// Exec execute a command in the session.
+// This method is not goroutine safe.
 func (s *Shell) Exec(cmd string) (stdout string, err error) {
 	// wrap the command in special markers so we know when to stop reading from the pipes
 	boundary := s.randomBoundary()
@@ -156,6 +174,7 @@ func (s *Shell) Exec(cmd string) (stdout string, err error) {
 	return stdout, nil
 }
 
+// Exit closes the session.
 func (s *Shell) Exit() error {
 	_, err := s.stdin.Write([]byte("exit" + newline))
 	if err != nil {
