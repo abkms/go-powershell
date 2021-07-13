@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hnakamur/go-powershell"
+	"github.com/ycyun/go-powershell"
 )
 
 func Example() {

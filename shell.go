@@ -24,6 +24,7 @@ import (
 
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/encoding/korean"
 )
 
 const exeFilename = "powershell.exe"
@@ -58,6 +59,7 @@ var ErrUnsupportedCodePage = errors.New("unsupported code page")
 // before calling the New method.
 var Encodings = map[int]encoding.Encoding{
 	932:   japanese.ShiftJIS,
+	949:   korean.EUCKR,
 	65001: encoding.Nop,
 }
 

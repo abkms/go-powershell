@@ -1,4 +1,4 @@
-module github.com/hnakamur/go-powershell
+module github.com/ycyun/go-powershell
 
 go 1.13
 

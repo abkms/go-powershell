@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hnakamur/go-powershell"
+	"github.com/ycyun/go-powershell"
 )
 
 func TestShell_Exec(t *testing.T) {
