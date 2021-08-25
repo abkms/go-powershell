@@ -14,6 +14,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"golang.org/x/text/encoding/unicode"
 	"io"
 	"math/rand"
 	"os/exec"
@@ -60,7 +61,8 @@ var ErrUnsupportedCodePage = errors.New("unsupported code page")
 var Encodings = map[int]encoding.Encoding{
 	932:   japanese.ShiftJIS,
 	949:   korean.EUCKR,
-	65001: encoding.Nop,
+	//65001: encoding.Nop,
+	65001:	unicode.UTF8,
 }
 
 // New creates a new PowerShell session.
@@ -171,7 +173,7 @@ func (s *Shell) Exec(cmd string) (stdout string, err error) {
 	go readOutput(s.stderr, s.enc.NewDecoder(), &stderr, boundary, &wg)
 	wg.Wait()
 	if len(stderr) > 0 {
-		return "", errors.New(stderr)
+		return stdout, errors.New(stderr)
 	}
 	return stdout, nil
 }
