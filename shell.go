@@ -215,14 +215,14 @@ func readOutput(r io.Reader, dec *encoding.Decoder, out *string, boundary string
 			return
 		}
 
-		decoded, err := dec.Bytes(buf[:n])
-		if err != nil {
-			return
-		}
-
-		bout = append(bout, decoded...)
+		bout = append(bout, buf[:n]...)
 		if bytes.HasSuffix(bout, marker) {
 			bout = bout[:len(bout)-len(marker)]
+			bout, err = dec.Bytes(bout)
+			if err != nil {
+				return
+			}
+			//bout = decoded
 			return
 		}
 	}
